@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { HydraApiClient } from '../services/hydraApi';
-import { HydraNodeConfig, HydraNodeData, HydraNodeState, ClientInput } from '../types/hydra';
+import { HydraNodeConfig, HydraNodeData, ClientInput } from '../types/hydra';
 
 export const useHydraController = () => {
   const [nodes, setNodes] = useState<Map<string, HydraNodeData>>(new Map());
