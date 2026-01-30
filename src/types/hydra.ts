@@ -71,3 +71,20 @@ export interface HydraApiConfig {
   url: string;
   timeout?: number;
 }
+
+// Node Configuration
+export interface HydraNodeConfig {
+  id: string;
+  name?: string;
+  url: string;
+  timeout?: number;
+  bos?: string; // Blockchain Operating System identifier
+}
+
+export interface HydraNodeData {
+  config: HydraNodeConfig;
+  state: HydraNodeState;
+  isConnected: boolean;
+  isLoading: boolean;
+  error: string | null;
+}

@@ -1,110 +1,84 @@
 import React from 'react';
 import Head from 'next/head';
-import { HydraController } from '../components/HydraController';
-import { ApiConfig } from '../components/ApiConfig';
-import { NodeStatus } from '../components/NodeStatus';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { NodeSwapCard } from '../components/NodeSwapCard';
 import { useHydraController } from '../hooks/useHydraController';
 
 export default function Home() {
   const {
-    config,
-    nodeState,
-    isConnected,
-    isLoading,
-    error,
-    updateConfig,
+    nodes,
+    addNode,
+    removeNode,
+    updateNodeUrl,
+    updateNodeBos,
     testConnection,
     sendCommand,
     setError,
   } = useHydraController();
 
+  const handleAddNode = () => {
+    const newNodeId = `node-${Date.now()}`;
+    addNode({
+      id: newNodeId,
+      url: 'http://localhost:4001',
+      timeout: 5000,
+    });
+  };
+
   return (
     <>
       <Head>
-        <title>Mesh Hydra Controller</title>
-        <meta name="description" content="A clean UI for managing Mesh Hydra head operations" />
+        <title>Hydra Controller - DEX Style</title>
+        <meta name="description" content="A DEX-style interface for managing multiple Mesh Hydra nodes" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="min-h-screen">
-        <div className="container py-4">
+      <main className="swap-container">
+        <div className="swap-wrapper">
           {/* Header */}
-          <div className="text-center mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <div></div>
-              <h1>Mesh Hydra Controller</h1>
+          <div className="swap-header">
+            <div className="swap-header-content">
+              <h1 className="swap-title">Hydra Controller</h1>
+              <p className="swap-subtitle">Manage multiple Hydra nodes with a clean DEX-style interface</p>
+            </div>
+            <div className="swap-header-actions">
               <ThemeToggle />
             </div>
-            <p className="text-muted">
-              A clean and simple interface for managing Mesh Hydra head operations
-            </p>
           </div>
 
-          {/* Error Display */}
-          {error && (
-            <div className="card mb-3">
-              <div className="flex items-center gap-2">
-                <span className="status status-error">Error</span>
-                <span>{error}</span>
-                <button
-                  className="btn btn-secondary ml-auto"
-                  onClick={() => setError(null)}
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* API Configuration */}
-          <div className="mb-4">
-            <ApiConfig
-              config={config}
-              onConfigChange={updateConfig}
-              onTestConnection={testConnection}
-              isConnected={isConnected}
-              isLoading={isLoading}
-            />
-          </div>
-
-          {/* Main Content */}
-          {isConnected ? (
-            <div className="grid grid-cols-1 gap-4">
-              {/* Node Status */}
-              <NodeStatus nodeState={nodeState} />
-              
-              {/* Hydra Controller */}
-              <HydraController
+          <div className="swap-nodes-grid">
+            {nodes.map((nodeData) => (
+              <NodeSwapCard
+                key={nodeData.config.id}
+                nodeId={nodeData.config.id}
+                config={nodeData.config}
+                nodeState={nodeData.state}
+                isConnected={nodeData.isConnected}
+                isLoading={nodeData.isLoading}
+                error={nodeData.error}
+                onUrlChange={updateNodeUrl}
+                onTestConnection={testConnection}
                 onSendCommand={sendCommand}
-                nodeState={nodeState}
-                isLoading={isLoading}
+                onBosChange={updateNodeBos}
               />
-            </div>
-          ) : (
-            <div className="card text-center">
-              <h3>Connect to Mesh Hydra Node</h3>
-              <p className="text-muted mb-3">
-                Configure the API connection above to start managing your Mesh Hydra head.
-              </p>
-              <button
-                className="btn btn-primary"
-                onClick={testConnection}
-                disabled={isLoading}
-              >
-                Test Connection
-              </button>
-            </div>
-          )}
+            ))}
+          </div>
+
+          {/* Add Node Button */}
+          <div className="swap-add-node">
+            <button
+              className="swap-add-btn"
+              onClick={handleAddNode}
+            >
+              + Add New Node
+            </button>
+          </div>
 
           {/* Footer */}
-          <footer className="text-center mt-4 text-muted">
-            <p>
-              Built with Next.js and inspired by{' '}
-              <a href="https://simplecss.org/" target="_blank" rel="noopener noreferrer">
-                Simple.css
-              </a>
+          <footer className="swap-footer">
+            <p className="text-muted">
+          
             </p>
           </footer>
         </div>
