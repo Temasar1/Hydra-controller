@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hydra Controller Design System */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 20% 15%;
+
+    --card: 210 20% 98%;
+    --card-foreground: 220 20% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 220 20% 25%;
+
+    --muted: 210 15% 92%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 15% 88%;
+    --input: 210 15% 92%;
+    --ring: 199 89% 48%;
+
+    --radius: 0.25rem;
+
+    --hydra-blue: 199 89% 48%;
+    --hydra-cyan: 187 85% 53%;
+
+    --sidebar-dark: 210 20% 96%;
+    --terminal: 220 15% 12%;
+    --terminal-text: 120 40% 65%;
+
+    --sidebar-background: 210 20% 96%;
+    --sidebar-foreground: 220 20% 15%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 15% 90%;
+    --sidebar-accent-foreground: 220 20% 25%;
+    --sidebar-border: 210 15% 88%;
+    --sidebar-ring: 199 89% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* Parallelogram slanted node cards */
+  .node-card {
+    clip-path: polygon(
+      20px 0,
+      100% 0,
+      calc(100% - 20px) 100%,
+      0 100%
+    );
+    @apply rounded-none;
+  }
+
+  .node-card-header {
+    clip-path: polygon(
+      12px 0,
+      100% 0,
+      calc(100% - 12px) 100%,
+      0 100%
+    );
+  }
+
+  /* Control panel with reverse slant */
+  .panel-slant-right {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 16px) 0,
+      100% 100%,
+      16px 100%
+    );
+  }
+
+  /* Header with bottom slant */
+  .header-slant {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 100%,
+      24px 100%
+    );
+  }
+
+  /* Terminal with top slant */
+  .terminal-slant {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 24px) 0,
+      100% 100%,
+      0 100%
+    );
+  }
+
+  /* Sidebar slant */
+  .sidebar-slant {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% calc(100% - 32px),
+      0 100%
+    );
+  }
+
+  /* Skewed container effect */
+  .skew-container {
+    position: relative;
+  }
+
+  .skew-container::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.3));
+  }
+}

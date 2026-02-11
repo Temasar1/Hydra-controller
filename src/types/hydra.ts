@@ -1,90 +1,34 @@
-// Hydra Transaction Types
-export interface HydraTransaction {
-  id: string;
-  inputs: TransactionInput[];
-  outputs: TransactionOutput[];
-  fee: number;
-  validityInterval?: {
-    invalidBefore?: number;
-    invalidHereafter?: number;
-  };
-}
-
-export interface TransactionInput {
-  txId: string;
-  index: number;
-}
-
-export interface TransactionOutput {
-  address: string;
-  value: number;
-  datum?: string;
-}
-
-// Snapshot Types
-export interface InitialSnapshot {
-  snapshotNumber: number;
-  utxo: HydraTransaction[];
-  timestamp: number;
-}
-
-export interface ConfirmedSnapshot {
-  snapshotNumber: number;
-  utxo: HydraTransaction[];
-  timestamp: number;
-  confirmedAt: number;
-}
-
-// Client Input Types
 export type ClientInput =
   | { tag: "Init" }
   | { tag: "Abort" }
-  | { tag: "NewTx"; transaction: HydraTransaction }
+  | { tag: "NewTx"; transaction: string }
   | { tag: "Recover"; recoverTxId: string }
-  | { tag: "Decommit"; transaction: HydraTransaction }
+  | { tag: "Decommit"; transaction: string }
   | { tag: "Close" }
   | { tag: "Contest" }
   | { tag: "Fanout" }
-  | { tag: "SideLoadSnapshot"; snapshot: InitialSnapshot | ConfirmedSnapshot };
+  | { tag: "SideLoadSnapshot"; snapshot: string };
 
-// Hydra Node State
-export interface HydraNodeState {
-  headId?: string;
-  contestationDeadline?: number;
-  contestationPeriod?: number;
-  parties: string[];
-  utxo: HydraTransaction[];
-  snapshotNumber: number;
-  isInitialized: boolean;
-  isOpen: boolean;
-  isClosed: boolean;
-}
-
-// API Response Types
-export interface HydraApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
-
-export interface HydraApiConfig {
-  url: string;
-  timeout?: number;
-}
-
-// Node Configuration
-export interface HydraNodeConfig {
-  id: string;
-  name?: string;
-  url: string;
-  timeout?: number;
-  bos?: string; // Blockchain Operating System identifier
-}
-
-export interface HydraNodeData {
-  config: HydraNodeConfig;
-  state: HydraNodeState;
-  isConnected: boolean;
-  isLoading: boolean;
-  error: string | null;
-}
+export const clientInput = {
+  init: { tag: "Init" } as ClientInput,
+  abort: { tag: "Abort" } as ClientInput,
+  newTx: (transaction: string): ClientInput => ({
+    tag: "NewTx",
+    transaction,
+  }),
+  recover: (txhash: string): ClientInput => ({ 
+    tag: "Recover", 
+    recoverTxId: txhash 
+  }),
+  decommit: (transaction: string): ClientInput => ({
+    tag: "Decommit",
+    transaction,
+  }),
+  close: { tag: "Close" } as ClientInput,
+  contest: { tag: "Contest" } as ClientInput,
+  fanout: { tag: "Fanout" } as ClientInput,
+  sideLoadSnapshot: (snapshot: string): ClientInput => ({
+    tag: "SideLoadSnapshot",
+    snapshot: snapshot,
+  }),
+};
