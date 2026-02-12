@@ -1,6 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia(query);
+    setMatches(m.matches);
+    const handler = () => setMatches(m.matches);
+    m.addEventListener("change", handler);
+    return () => m.removeEventListener("change", handler);
+  }, [query]);
+  return matches;
+}
 import { ClientInput } from "@/types/hydra";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -12,9 +24,18 @@ import { Label } from "@/components/label";
 import { ScrollArea } from "@/components/scroll-area";
 
 export default function Home() {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const [nodeCount, setNodeCount] = useState(2);
   const [logs, setLogs] = useState<string[]>([]);
   const [connectedNodes, setConnectedNodes] = useState(0);
+  const [broadcastOpen, setBroadcastOpen] = useState(true);
+  const hasInitializedMobile = useRef(false);
+  useEffect(() => {
+    if (isMobile && !hasInitializedMobile.current) {
+      hasInitializedMobile.current = true;
+      setBroadcastOpen(false);
+    }
+  }, [isMobile]);
 
   const handleNodeAction = (nodeId: number, action: ClientInput) => {
     const logMessage = `[Node ${nodeId}] ${action.tag}${
@@ -45,8 +66,8 @@ export default function Home() {
         <Sidebar nodeCount={nodeCount} onNodeCountChange={setNodeCount} />
         <div className="flex-1 flex flex-col min-w-0">
           <Header connectedNodes={connectedNodes} totalNodes={nodeCount} />
-          <div className="flex-1 flex min-h-0">
-            <div className="flex-1 p-4 pl-6 overflow-auto">
+          <div className="flex-1 flex min-h-0 relative">
+            <div className="flex-1 p-4 pl-6 overflow-auto min-w-0">
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 h-full">
                 {Array.from({ length: nodeCount }, (_, i) => (
                   <NodeCard
@@ -57,7 +78,12 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            <ControlPanel onBroadcastAction={handleBroadcastAction} />
+            <ControlPanel
+              isOpen={broadcastOpen}
+              onOpen={() => setBroadcastOpen(true)}
+              onClose={() => setBroadcastOpen(false)}
+              onBroadcastAction={handleBroadcastAction}
+            />
           </div>
         </div>
       </div>
@@ -113,7 +139,7 @@ function Sidebar({ nodeCount, onNodeCountChange }: SidebarProps) {
             "w-10 h-10 rounded-lg flex items-center justify-center text-xs transition-all",
             i === 0
               ? "bg-muted text-foreground border border-border"
-              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+              : "text-muted-foreground hover:bg-foreground hover:text-background"
           )}
           title={label}
         >
@@ -131,7 +157,7 @@ function Sidebar({ nodeCount, onNodeCountChange }: SidebarProps) {
                 "w-8 h-6 rounded text-xs font-mono transition-all",
                 nodeCount === count
                   ? "bg-foreground text-background"
-                  : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                  : "bg-secondary text-muted-foreground hover:bg-foreground hover:text-background"
               )}
             >
               {count}
@@ -144,10 +170,13 @@ function Sidebar({ nodeCount, onNodeCountChange }: SidebarProps) {
 }
 
 interface ControlPanelProps {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
   onBroadcastAction: (action: string) => void;
 }
 
-function ControlPanel({ onBroadcastAction }: ControlPanelProps) {
+function ControlPanel({ isOpen, onOpen, onClose, onBroadcastAction }: ControlPanelProps) {
   const actions = [
     { tag: "Init", variant: "default" as const },
     { tag: "Abort", variant: "destructive" as const },
@@ -156,9 +185,34 @@ function ControlPanel({ onBroadcastAction }: ControlPanelProps) {
     { tag: "Fanout", variant: "secondary" as const },
   ];
 
+  if (!isOpen) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        className="w-10 shrink-0 bg-card border-l border-border flex flex-col items-center justify-center gap-1 py-4 hover:bg-foreground hover:text-background transition-colors"
+        aria-label="Open Broadcast panel"
+      >
+        <span className="text-xs font-medium text-muted-foreground" style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}>
+          Broadcast
+        </span>
+      </button>
+    );
+  }
+
   return (
-    <aside className="w-48 bg-card border-l border-border p-4 flex flex-col gap-3 panel-slant-right pl-6 pr-5">
-      <h3 className="text-sm font-semibold text-foreground mb-2 pl-2">Broadcast</h3>
+    <aside className="w-48 shrink-0 bg-card border-l border-border p-4 flex flex-col gap-3 panel-slant-right pl-6 pr-5">
+      <div className="flex items-center justify-between gap-2 mb-1 pl-2 -mr-1">
+        <h3 className="text-sm font-semibold text-foreground">Broadcast</h3>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close Broadcast panel"
+          className="shrink-0 h-8 w-8 flex items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-foreground hover:text-background font-medium text-lg leading-none"
+        >
+          ×
+        </button>
+      </div>
       <p className="text-xs text-muted-foreground mb-2 pl-2">
         Send to all connected nodes
       </p>
@@ -495,7 +549,7 @@ function Terminal({ logs, onClear }: TerminalProps) {
             </div>
           ) : (
             logs.map((log, i) => (
-              <div key={i} className="text-terminal-text px-2 py-0.5 hover:bg-secondary/30 rounded">
+              <div key={i} className="text-terminal-text px-2 py-0.5 hover:bg-foreground hover:text-background rounded">
                 <span className="text-muted-foreground mr-2">{new Date().toLocaleTimeString()}</span>
                 {log}
               </div>
