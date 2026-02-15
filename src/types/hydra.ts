@@ -1,3 +1,5 @@
+import { useHydra } from "@meshsdk/hydra-react";
+
 export type ClientInput =
   | { tag: "Init" }
   | { tag: "Abort" }
